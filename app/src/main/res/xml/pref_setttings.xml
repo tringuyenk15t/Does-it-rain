@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:title="@string/pref_enable_notifications_label"
+        android:defaultValue="@string/pref_enable_notifications_default"
+        android:key="@string/pref_enable_notifications_key"
+        android:summaryOff="@string/pref_enable_notifications_false"
+        android:summaryOn="@string/pref_enable_notifications_true"/>
+
+    <ListPreference
+        android:title="@string/pref_units_label"
+        android:key="@string/pref_unit_key"
+        android:defaultValue="@string/pref_units_metric"
+        android:entries="@array/pref_units_options"
+        android:entryValues="@array/pref_units_values"
+        android:summary="This is list preference"
+        />
+
+    <EditTextPreference
+        android:title="@string/pref_cnt_label"
+        android:key="@string/pref_cnt_key"
+        android:defaultValue="@string/pref_cnt_default_value" />
+
+</PreferenceScreen>
