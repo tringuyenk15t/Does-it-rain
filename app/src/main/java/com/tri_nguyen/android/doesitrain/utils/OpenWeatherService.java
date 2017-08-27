@@ -1,10 +1,9 @@
 package com.tri_nguyen.android.doesitrain.utils;
 
-import com.tri_nguyen.android.doesitrain.data.weather.WeatherResponse;
+import com.tri_nguyen.android.doesitrain.data.weather_model.WeatherResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**

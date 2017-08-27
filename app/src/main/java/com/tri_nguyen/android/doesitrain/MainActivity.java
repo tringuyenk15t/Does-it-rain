@@ -2,6 +2,8 @@ package com.tri_nguyen.android.doesitrain;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -11,10 +13,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
-import com.tri_nguyen.android.doesitrain.data.SampleWeatherObject;
-import com.tri_nguyen.android.doesitrain.data.weather.WeatherItem;
-import com.tri_nguyen.android.doesitrain.data.weather.WeatherResponse;
+import com.tri_nguyen.android.doesitrain.data.WeatherContract;
+import com.tri_nguyen.android.doesitrain.data.WeatherDpHelper;
+import com.tri_nguyen.android.doesitrain.data.weather_model.CustomWeatherModel;
+import com.tri_nguyen.android.doesitrain.data.weather_model.WeatherItem;
+import com.tri_nguyen.android.doesitrain.data.weather_model.WeatherResponse;
 import com.tri_nguyen.android.doesitrain.utils.NetworkUtils;
 import com.tri_nguyen.android.doesitrain.utils.OpenWeatherService;
 
@@ -26,11 +33,16 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
-    private List<SampleWeatherObject> list = new ArrayList<>();
     private RecyclerView rclForecast;
-    private RecyclerView.LayoutManager manager;
-    private ForecastAdapter adapter;
-    private List<WeatherItem> mWeatherListItem = new ArrayList<>();
+    private RecyclerView.LayoutManager mManager;
+    private ForecastAdapter mAdapter;
+
+    private List<CustomWeatherModel> mWeatherListItem = new ArrayList<>();
+
+    private ProgressBar mProgressBar;
+    private WeatherDpHelper mDbHelper;
+    private Cursor mCursor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,44 +52,53 @@ public class MainActivity extends AppCompatActivity {
         //remove action bar's border
         getSupportActionBar().setElevation(0);
 
+        mDbHelper = new WeatherDpHelper(this);
+
         initializedLayout();
         getWeatherData();
     }
 
     private void initializedLayout(){
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         rclForecast = (RecyclerView) findViewById(R.id.recycler_list_forecast);
-        manager = new LinearLayoutManager(this);
-        adapter = new ForecastAdapter(this,mWeatherListItem);
-        rclForecast.setLayoutManager(manager);
-        rclForecast.setAdapter(adapter);
+        mManager = new LinearLayoutManager(this);
+        mAdapter = new ForecastAdapter(this,mWeatherListItem);
+        rclForecast.setLayoutManager(mManager);
+        rclForecast.setAdapter(mAdapter);
     }
 
     /**
      * fetch weather data from server
      */
     private void getWeatherData (){
-        //TODO this method should query from sqlite database instead of loading data directly
-        // to improve performance
+
+        onLoadingWeatherData();
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String cnt = sharedPreferences.getString(
+                getString(R.string.pref_cnt_key),getString(R.string.pref_cnt_default_value));
 
         OpenWeatherService openWeatherService =
                 NetworkUtils.createService(OpenWeatherService.class);
-
-        String cnt = sharedPreferences.getString(
-                getString(R.string.pref_cnt_key),getString(R.string.pref_cnt_default_value));
         Call<WeatherResponse> call = openWeatherService.getForecast(cnt);
-
         call.enqueue(new Callback<WeatherResponse>() {
             @Override
             public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
                 WeatherResponse weatherResponse = response.body();
-                adapter.setWeatherListItem(weatherResponse.getWeatherItem());
-                adapter.notifyDataSetChanged();
+//                mAdapter.setWeatherListItem(weatherResponse.getWeatherItem());
+//                mAdapter.notifyDataSetChanged();
+
+                SQLiteDatabase db = mDbHelper.getWritableDatabase();
+                mDbHelper.insertNewForecast(db,weatherResponse);
+                onShowingWeatherData();
             }
 
             @Override
             public void onFailure(Call<WeatherResponse> call, Throwable t) {
+                onShowingWeatherData();
                 Log.e("Network Error: " , "Failed of fetching forecast data!");
+                Toast.makeText(getApplication(), "Network Error: Failed of fetching forecast data!",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -106,5 +127,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         getWeatherData();
+    }
+
+    private void onLoadingWeatherData(){
+        mProgressBar.setVisibility(View.VISIBLE);
+        rclForecast.setVisibility(View.INVISIBLE);
+    }
+
+    private void onShowingWeatherData(){
+        mProgressBar.setVisibility(View.INVISIBLE);
+        rclForecast.setVisibility(View.VISIBLE);
     }
 }

@@ -1,5 +1,5 @@
 
-package com.tri_nguyen.android.doesitrain.data.weather;
+package com.tri_nguyen.android.doesitrain.data.weather_model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -30,6 +30,9 @@ public class WeatherItem {
     @SerializedName("clouds")
     @Expose
     private Integer clouds;
+    @SerializedName("rain")
+    @Expose
+    private Double rain;
 
     public Integer getDt() {
         return dt;
@@ -93,6 +96,14 @@ public class WeatherItem {
 
     public void setClouds(Integer clouds) {
         this.clouds = clouds;
+    }
+
+    public Double getRain() {
+        return rain;
+    }
+
+    public void setRain(Double rain) {
+        this.rain = rain;
     }
 
 }

@@ -1,5 +1,5 @@
 
-package com.tri_nguyen.android.doesitrain.data.weather;
+package com.tri_nguyen.android.doesitrain.data.weather_model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
