@@ -57,7 +57,7 @@ public class WeatherDpHelper extends SQLiteOpenHelper{
      * @param db - writable database
      * @param response - weather info need to be inserted
      */
-    public int insertNewForecast(SQLiteDatabase db, WeatherResponse response){
+    public static int insertNewForecast(SQLiteDatabase db, WeatherResponse response){
         ContentValues values = new ContentValues();
         List<WeatherItem> forecastList = response.getWeatherItem();
         int columnInserted = 0;

@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
         mDbHelper = new WeatherDpHelper(this);
 
         initializedLayout();
-        getWeatherData();
     }
 
     private void initializedLayout(){
@@ -85,12 +84,27 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
                 WeatherResponse weatherResponse = response.body();
-//                mAdapter.setWeatherListItem(weatherResponse.getWeatherItem());
-//                mAdapter.notifyDataSetChanged();
 
                 SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
                 mDbHelper.insertNewForecast(db,weatherResponse);
                 onShowingWeatherData();
+
+                mCursor = mDbHelper.getReadableDatabase().query(
+                        WeatherContract.WeatherEntry.TABLE_NAME,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+
+                while (mCursor.moveToNext()){
+                    CustomWeatherModel weatherItem = new CustomWeatherModel(mCursor);
+                    mWeatherListItem.add(weatherItem);
+                }
+                mAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -127,6 +141,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         getWeatherData();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mCursor.close();
     }
 
     private void onLoadingWeatherData(){

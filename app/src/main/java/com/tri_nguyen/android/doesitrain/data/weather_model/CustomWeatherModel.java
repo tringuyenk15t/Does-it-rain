@@ -33,6 +33,20 @@ public class CustomWeatherModel {
         }
     }
 
+    public CustomWeatherModel(Cursor cursor){
+        date = cursor.getInt(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_DATE));
+        weatherId = cursor.getInt(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID));
+        description = cursor.getString(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_WEATHER_DESCRIPTION));
+        iconId = cursor.getString(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_WEATHER_ICON));
+        maxTemp = cursor.getDouble(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP));
+        minTemp = cursor.getDouble(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP));
+        pressure = cursor.getDouble(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_PRESSURE));
+        humidity = cursor.getInt(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_HUMIDITY));
+        speed = cursor.getDouble(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED));
+        direction = cursor.getInt(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_WIND_DIRECTION));
+
+        rain = cursor.getDouble(cursor.getColumnIndexOrThrow(WeatherContract.WeatherEntry.COLUMN_RAIN));
+    }
 
 
     public int getDate() {
