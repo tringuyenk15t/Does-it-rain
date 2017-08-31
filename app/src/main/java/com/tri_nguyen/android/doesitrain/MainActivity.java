@@ -20,7 +20,6 @@ import android.widget.Toast;
 import com.tri_nguyen.android.doesitrain.data.WeatherContract;
 import com.tri_nguyen.android.doesitrain.data.WeatherDpHelper;
 import com.tri_nguyen.android.doesitrain.data.weather_model.CustomWeatherModel;
-import com.tri_nguyen.android.doesitrain.data.weather_model.WeatherItem;
 import com.tri_nguyen.android.doesitrain.data.weather_model.WeatherResponse;
 import com.tri_nguyen.android.doesitrain.utils.NetworkUtils;
 import com.tri_nguyen.android.doesitrain.utils.OpenWeatherService;
@@ -54,10 +53,10 @@ public class MainActivity extends AppCompatActivity {
 
         mDbHelper = new WeatherDpHelper(this);
 
-        initializedLayout();
+        initializedViews();
     }
 
-    private void initializedLayout(){
+    private void initializedViews(){
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         rclForecast = (RecyclerView) findViewById(R.id.recycler_list_forecast);
         mManager = new LinearLayoutManager(this);

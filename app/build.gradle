@@ -22,6 +22,10 @@ android {
     }
 }
 
+apply plugin: 'com.android.application'
+// apply greenDAO plugin
+apply plugin: 'org.greenrobot.greendao'
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -43,4 +47,7 @@ dependencies {
 
     //for settings preference
     compile 'com.android.support:preference-v7:26.+'
+
+    // add greenDAO library
+    compile 'org.greenrobot:greendao:3.2.2'
 }
