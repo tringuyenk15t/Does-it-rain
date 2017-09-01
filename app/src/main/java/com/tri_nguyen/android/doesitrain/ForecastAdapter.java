@@ -10,9 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.tri_nguyen.android.doesitrain.data.SampleWeatherObject;
-import com.tri_nguyen.android.doesitrain.data.weather_model.CustomWeatherModel;
-import com.tri_nguyen.android.doesitrain.data.weather_model.WeatherItem;
+import com.tri_nguyen.android.doesitrain.data.WeatherInfo;
+import com.tri_nguyen.android.doesitrain.data.weather_pojo.CustomWeatherModel;
 import com.tri_nguyen.android.doesitrain.utils.DateTimeUtils;
 import com.tri_nguyen.android.doesitrain.utils.NetworkUtils;
 import com.tri_nguyen.android.doesitrain.utils.WeatherUtils;
@@ -24,15 +23,15 @@ import java.util.List;
  */
 
 public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastListViewHolder> {
-    private List<CustomWeatherModel> mWeatherListItem;
+    private List<WeatherInfo> mForecastList;
 
     private Context mContext;
     private static final int VIEW_TYPE_FUTURE_DAY = 2;
     private static final int VIEW_TYPE_TODAY = 1;
     private boolean mUseTodayLayout = true;
 
-    public ForecastAdapter(Context context, List<CustomWeatherModel> mWeatherListItem) {
-        this.mWeatherListItem = mWeatherListItem;
+    public ForecastAdapter(Context context, List<WeatherInfo> mWeatherListItem) {
+        this.mForecastList = mWeatherListItem;
         this.mContext = context;
     }
 
@@ -68,23 +67,23 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     @Override
     public void onBindViewHolder(ForecastListViewHolder holder, int position) {
-        CustomWeatherModel singleItem = mWeatherListItem.get(position);
+        WeatherInfo singleItem = mForecastList.get(position);
 //        //TODO need to fix date format
         holder.tvDate.setText(DateTimeUtils.convertDateTimeToString(singleItem.getDate()));
-        holder.tvSummary.setText(singleItem.getDescription());
+        holder.tvSummary.setText(singleItem.getWeatherDescription());
 
         //load weather icon from opwenweather server.
-        String imgUrl = NetworkUtils.BASE_URL_FOR_IMG + singleItem.getIconId() + ".png";
+        String imgUrl = NetworkUtils.BASE_URL_FOR_IMG + singleItem.getWeatherIcon() + ".png";
         Glide.with(mContext)
                 .load(imgUrl)
                 .into(holder.imgWeatherIcon);
 
-        double maxTempInDouble = singleItem.getMaxTemp();
+        double maxTempInDouble = singleItem.getMaxTemperature();
         String highString = WeatherUtils.formatTemperature(mContext, maxTempInDouble);
         String highA11y = mContext.getString(R.string.a11y_high_temp, highString);
         holder.tvHigh.setText(highA11y);
 
-        double minTempInDouble = singleItem.getMaxTemp();
+        double minTempInDouble = singleItem.getMinTemperature();
         String lowString = WeatherUtils.formatTemperature(mContext, minTempInDouble);
         holder.tvLow.setText(lowString);
 
@@ -106,7 +105,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     @Override
     public int getItemCount() {
-        return mWeatherListItem.size();
+        return mForecastList.size();
     }
 
     @Override
@@ -118,8 +117,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         }
     }
 
-    public void setWeatherListItem(List<CustomWeatherModel> weatherListItem){
-        this.mWeatherListItem = weatherListItem;
+    public void setWeatherListItem(List<WeatherInfo> forecastList){
+        this.mForecastList = forecastList;
     }
 
 }

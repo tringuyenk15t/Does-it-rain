@@ -1,4 +1,4 @@
-package com.tri_nguyen.android.doesitrain.data.weather_model;
+package com.tri_nguyen.android.doesitrain.data.weather_pojo;
 
 import android.database.Cursor;
 
