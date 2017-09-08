@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.tri_nguyen.android.doesitrain.data.WeatherInfo;
-import com.tri_nguyen.android.doesitrain.data.weather_pojo.CustomWeatherModel;
 import com.tri_nguyen.android.doesitrain.utils.DateTimeUtils;
 import com.tri_nguyen.android.doesitrain.utils.NetworkUtils;
 import com.tri_nguyen.android.doesitrain.utils.WeatherUtils;
@@ -69,10 +68,10 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     public void onBindViewHolder(ForecastListViewHolder holder, int position) {
         WeatherInfo singleItem = mForecastList.get(position);
 //        //TODO need to fix date format
-        holder.tvDate.setText(DateTimeUtils.convertDateTimeToString(singleItem.getDate()));
+        holder.tvDate.setText(DateTimeUtils.convertDateTimeToString(mContext, singleItem.getDate()));
         holder.tvSummary.setText(singleItem.getWeatherDescription());
 
-        //load weather icon from opwenweather server.
+        //load weather icon from open weather server.
         String imgUrl = NetworkUtils.BASE_URL_FOR_IMG + singleItem.getWeatherIcon() + ".png";
         Glide.with(mContext)
                 .load(imgUrl)
@@ -110,6 +109,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     @Override
     public int getItemViewType(int position) {
+        //TODO update this methods by assign correct today value
         if(mUseTodayLayout && position == 0){
             return VIEW_TYPE_TODAY;
         }else{

@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +23,7 @@ import com.tri_nguyen.android.doesitrain.data.WeatherInfo;
 import com.tri_nguyen.android.doesitrain.data.WeatherInfoDao;
 import com.tri_nguyen.android.doesitrain.data.weather_pojo.WeatherItem;
 import com.tri_nguyen.android.doesitrain.data.weather_pojo.WeatherResponse;
+import com.tri_nguyen.android.doesitrain.utils.DateTimeUtils;
 import com.tri_nguyen.android.doesitrain.utils.NetworkUtils;
 import com.tri_nguyen.android.doesitrain.utils.OpenWeatherService;
 
@@ -35,6 +37,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
+
     private RecyclerView rclForecast;
     private RecyclerView.LayoutManager mManager;
     private ForecastAdapter mAdapter;
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private DaoSession mDaoSession;
     private WeatherInfoDao mWeatherInfoDao;
     private Query<WeatherInfo> mQuery;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i< weatherItems.size(); i++){
             WeatherInfo weatherInfo = new WeatherInfo();
+
             weatherInfo.setDate(weatherItems.get(i).getDt());
             weatherInfo.setWeatherId(weatherItems.get(i).getWeather().get(0).getId());
             weatherInfo.setWeatherDescription(weatherItems.get(i).getWeather().get(0).getDescription());

@@ -16,10 +16,8 @@ public class WeatherInfo {
     @Id(autoincrement = true)
     private Long id;
 
-
-
     @NotNull
-    private int date;
+    private long date;
     private int weatherId;
     private String weatherDescription;
     private String weatherIcon;
@@ -33,8 +31,8 @@ public class WeatherInfo {
     @Property
     private double rain;
 
-    @Generated(hash = 369118456)
-    public WeatherInfo(Long id, int date, int weatherId, String weatherDescription,
+    @Generated(hash = 1516899839)
+    public WeatherInfo(Long id, long date, int weatherId, String weatherDescription,
             String weatherIcon, double maxTemperature, double minTemperature,
             double pressure, int humidity, double windSpeed, double windDirection,
             double rain) {
@@ -64,11 +62,11 @@ public class WeatherInfo {
         this.id = id;
     }
 
-    public int getDate() {
+    public long getDate() {
         return this.date;
     }
 
-    public void setDate(int date) {
+    public void setDate(long date) {
         this.date = date;
     }
 
@@ -151,5 +149,5 @@ public class WeatherInfo {
     public void setRain(double rain) {
         this.rain = rain;
     }
-
+    
 }

@@ -17,7 +17,7 @@
 
 
     <!-- - - - - - - - - - - - - - -
-  - Used by SunshineDateUtils  -
+  - Used by DateUtils  -
   - - - - - - - - - - - - - - -->
 
     <!-- For labelling today's forecast -->
@@ -26,7 +26,10 @@
     <!-- For labelling tomorrow's forecast -->
     <string name="tomorrow">Tomorrow</string>
 
-
+    <!-- Date format -->
+    <string name="format_full_friendly_date">
+        %1$s, %2$s %3$s
+    </string>
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       - Used for Accessibility purposes (Accessibility == a11y)                            -
       -                                                                                    -
@@ -40,7 +43,7 @@
     <string name="a11y_wind">Wind speed and direction: <xliff:g id="wind">%1$s</xliff:g></string>
 
     <!-- - - - - - - - - - - - - - - - -
-       - Used by SunshineWeatherUtils   -
+       - Used by WeatherUtils   -
        - - - - - - - - - - - - - - - - -->
 
     <!-- Temperature format -->
@@ -105,5 +108,4 @@
     <string name="pref_cnt_label">Number of days forecast</string>
     <string name="pref_cnt_default_value">7</string>
     <string name="pref_cnt_error">Please insert number of days between 1 and 17</string>
-
 </resources>
