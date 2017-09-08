@@ -1,7 +1,6 @@
 package com.tri_nguyen.android.doesitrain;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,11 +26,18 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     private Context mContext;
     private static final int VIEW_TYPE_FUTURE_DAY = 2;
     private static final int VIEW_TYPE_TODAY = 1;
-    private boolean mUseTodayLayout = true;
 
-    public ForecastAdapter(Context context, List<WeatherInfo> mWeatherListItem) {
+    private ForecastAdapterOnClickHandler mClickHandler;
+
+    public interface ForecastAdapterOnClickHandler {
+        void onClick(long id);
+    }
+
+    public ForecastAdapter(Context context, List<WeatherInfo> mWeatherListItem,
+                           ForecastAdapterOnClickHandler onclickHandler) {
         this.mForecastList = mWeatherListItem;
         this.mContext = context;
+        this.mClickHandler = onclickHandler;
     }
 
     @Override
@@ -52,13 +58,15 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(layoutId,parent,false);
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent detailIntent = new Intent(mContext,DetailActivity.class);
-                mContext.startActivity(detailIntent);
-            }
-        });
+
+        //TODO delete when implement ForecastAdapterOnClickHandler
+//        v.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent detailIntent = new Intent(mContext,DetailActivity.class);
+//                mContext.startActivity(detailIntent);
+//            }
+//        });
 
         ForecastListViewHolder holder = new ForecastListViewHolder(v);
         return holder;
@@ -67,7 +75,6 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     @Override
     public void onBindViewHolder(ForecastListViewHolder holder, int position) {
         WeatherInfo singleItem = mForecastList.get(position);
-//        //TODO need to fix date format
         holder.tvDate.setText(DateTimeUtils.convertDateTimeToString(mContext, singleItem.getDate()));
         holder.tvSummary.setText(singleItem.getWeatherDescription());
 
@@ -88,7 +95,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     }
 
-    public class ForecastListViewHolder extends RecyclerView.ViewHolder{
+    public class ForecastListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView tvDate, tvSummary, tvHigh, tvLow;
         public ImageView imgWeatherIcon;
 
@@ -99,6 +106,15 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
             tvHigh = itemView.findViewById(R.id.high_temperature);
             tvLow = itemView.findViewById(R.id.low_temperature);
             imgWeatherIcon = itemView.findViewById(R.id.weather_icon);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            int adapterPosition = getAdapterPosition();
+            long id = mForecastList.get(adapterPosition).getId();
+            mClickHandler.onClick(id);
         }
     }
 
@@ -109,8 +125,10 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     @Override
     public int getItemViewType(int position) {
-        //TODO update this methods by assign correct today value
-        if(mUseTodayLayout && position == 0){
+        long itemDate = mForecastList.get(position).getDate();
+
+        if(DateTimeUtils.getDayName(mContext,itemDate).equals(
+                mContext.getResources().getString(R.string.today))){
             return VIEW_TYPE_TODAY;
         }else{
             return VIEW_TYPE_FUTURE_DAY;

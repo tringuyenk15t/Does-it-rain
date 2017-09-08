@@ -27,7 +27,7 @@ public class DateTimeUtils {
     public static String convertDateTimeToString(Context context, long dt){
 
         Calendar calendar = new GregorianCalendar();
-        calendar.setTimeInMillis(dt*1000L);
+        calendar.setTimeInMillis(dt);
 
         String fullDateFormat = context.getResources().getString(R.string.format_full_friendly_date);
 
