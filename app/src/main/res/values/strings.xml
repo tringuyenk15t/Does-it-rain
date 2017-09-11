@@ -14,10 +14,9 @@
     <string name="humidity_label">Humidity</string>
     <string name="pressure_label">Pressure</string>
     <string name="wind_label">Wind</string>
-
-
+    <string name="rain_label">Rain</string>
     <!-- - - - - - - - - - - - - - -
-  - Used by SunshineDateUtils  -
+  - Used by DateUtils  -
   - - - - - - - - - - - - - - -->
 
     <!-- For labelling today's forecast -->
@@ -26,7 +25,10 @@
     <!-- For labelling tomorrow's forecast -->
     <string name="tomorrow">Tomorrow</string>
 
-
+    <!-- Date format -->
+    <string name="format_full_friendly_date">
+        %1$s, %2$s %3$s
+    </string>
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       - Used for Accessibility purposes (Accessibility == a11y)                            -
       -                                                                                    -
@@ -40,7 +42,7 @@
     <string name="a11y_wind">Wind speed and direction: <xliff:g id="wind">%1$s</xliff:g></string>
 
     <!-- - - - - - - - - - - - - - - - -
-       - Used by SunshineWeatherUtils   -
+       - Used by WeatherUtils   -
        - - - - - - - - - - - - - - - - -->
 
     <!-- Temperature format -->
@@ -54,12 +56,6 @@
         <xliff:g id="direction">%2$s</xliff:g>
     </string>
 
-    <!-- Wind in mph -->
-    <string name="format_wind_mph">
-        <xliff:g id="speed">%1$1.0f</xliff:g> mph
-        <xliff:g id="direction">%2$s</xliff:g>
-    </string>
-
     <!-- Pressure format -->
     <string name="format_pressure">
         <xliff:g id="pressure">%1.0f</xliff:g> hPa
@@ -67,7 +63,12 @@
 
     <!-- Humidity format -->
     <string name="format_humidity">
-        <xliff:g id="humidity">%1.0f</xliff:g> %%
+        <xliff:g id="humidity">%1d</xliff:g> %%
+    </string>
+
+    <!--Rain format-->
+    <string name="format_rain">
+        <xliff:g id="humidity">%1.2f</xliff:g> m/s
     </string>
 
     <!-- - - - - - - - - - - - - - - - -
