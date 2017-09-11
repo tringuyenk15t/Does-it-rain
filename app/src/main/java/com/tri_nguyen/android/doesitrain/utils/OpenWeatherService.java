@@ -11,7 +11,6 @@ import retrofit2.http.Query;
  */
 
 public interface OpenWeatherService {
-
-    @GET("data/2.5/forecast/daily?lat=11.3210361&lon=106.0816538&mode=json&units=metric")
-    Call<WeatherResponse> getForecast(@Query("cnt") String cnt);
+    @GET("data/2.5/forecast/daily?mode=json&units=metric")
+    Call<WeatherResponse> getForecast(@Query("lat") double lat, @Query("lon") double lon , @Query("cnt") String cnt);
 }

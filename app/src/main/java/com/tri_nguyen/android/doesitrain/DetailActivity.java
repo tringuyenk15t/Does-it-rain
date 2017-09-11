@@ -50,10 +50,20 @@ public class DetailActivity extends AppCompatActivity {
         String lowString = WeatherUtils.formatTemperature(this, minTempInDouble);
         mDataBinding.primaryInfo.lowTempeturate.setText(lowString);
 
-        mDataBinding.extraInfo.humidity.setText(mWeatherInfo.getHumidity() + "");
-        mDataBinding.extraInfo.pressure.setText(mWeatherInfo.getPressure() + "");
-        //TODO Convert wind data into speed and degree format
-        mDataBinding.extraInfo.wind.setText(mWeatherInfo.getWindSpeed() +"");
+        String humilityFormat = getResources().getString(R.string.format_humidity);
+        mDataBinding.extraInfo.humidity.setText(
+                String.format(humilityFormat, mWeatherInfo.getHumidity()));
+
+        String pressureFormat = getResources().getString(R.string.format_pressure);
+        mDataBinding.extraInfo.pressure.setText(
+                String.format(pressureFormat, mWeatherInfo.getPressure()));
+
+        String wind = WeatherUtils.getFormattedWind(this,mWeatherInfo.getWindSpeed()
+                , mWeatherInfo.getWindDirection());
+        mDataBinding.extraInfo.wind.setText(wind);
+
+        String rainFormat = getResources().getString(R.string.format_rain);
+        mDataBinding.extraInfo.rain.setText(String.format(rainFormat, mWeatherInfo.getRain()));
     }
 
     @Override

@@ -56,7 +56,7 @@ public class WeatherDpHelper extends DaoMaster.DevOpenHelper{
             weatherInfo.setWindDirection(weatherItems.get(i).getDeg());
 
             if (weatherItems.get(i).getRain() == null){
-                weatherInfo.setRain(-1.0);
+                weatherInfo.setRain(0.0);
             }else{
                 weatherInfo.setRain(weatherItems.get(i).getRain());
             }

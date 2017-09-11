@@ -50,4 +50,6 @@ dependencies {
 
     // add greenDAO library
     compile 'org.greenrobot:greendao:3.2.2'
+
+    compile 'com.google.android.gms:play-services-location:11.+'
 }
