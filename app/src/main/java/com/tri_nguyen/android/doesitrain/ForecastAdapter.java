@@ -59,15 +59,6 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(layoutId,parent,false);
 
-        //TODO delete when implement ForecastAdapterOnClickHandler
-//        v.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent detailIntent = new Intent(mContext,DetailActivity.class);
-//                mContext.startActivity(detailIntent);
-//            }
-//        });
-
         ForecastListViewHolder holder = new ForecastListViewHolder(v);
         return holder;
     }

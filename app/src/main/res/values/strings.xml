@@ -107,4 +107,9 @@
     <string name="pref_cnt_default_value">7</string>
     <string name="pref_cnt_error">Please insert number of days between 1 and 17</string>
 
+    <!-- - - - - - - - - - - - - - - - -
+       - Used by app's warning or error message   -
+       - - - - - - - - - - - - - - - - -->
+    <string name="reject_permission_warning">You has rejected an importance permission, this app can not work without that permission. Please consider it to use permission!</string>
+
 </resources>

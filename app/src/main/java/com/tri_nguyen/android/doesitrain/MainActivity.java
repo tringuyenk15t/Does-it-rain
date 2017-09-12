@@ -1,12 +1,10 @@
 package com.tri_nguyen.android.doesitrain;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -23,11 +21,11 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.tri_nguyen.android.doesitrain.data.DaoMaster;
 import com.tri_nguyen.android.doesitrain.data.WeatherDpHelper;
 import com.tri_nguyen.android.doesitrain.data.WeatherInfo;
@@ -37,7 +35,6 @@ import com.tri_nguyen.android.doesitrain.utils.OpenWeatherService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Manifest;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,6 +50,9 @@ public class MainActivity extends AppCompatActivity implements
 
     private DaoMaster mDaoMaster;
     private FusedLocationProviderClient mFusedLocationClient;
+
+    private static final String TAG = MainActivity.class.getSimpleName();
+    public static final int PERMISSION_REQUEST_ID = 17;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,63 +82,16 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * fetch weather data from server
      */
-    private void getWeatherData() {
-
-        //Show progressBar while loading data
-        onLoadingWeatherData();
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-
-            return;
-        }
-        mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+    private void showForecastList() {
+        mFusedLocationClient.getLastLocation().addOnCompleteListener(this, new OnCompleteListener<Location>() {
             @Override
-            public void onSuccess(Location location) {
-                if (location != null){
-                    //get settings variables for fetching weather data
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
-                    String cnt = sharedPreferences.getString(
-                            getString(R.string.pref_cnt_key),getString(R.string.pref_cnt_default_value));
-                    double lat = location.getLatitude();
-                    double lon = location.getLongitude();
-
-                    OpenWeatherService openWeatherService =
-                            NetworkUtils.createService(OpenWeatherService.class);
-                    //TODO use current location instead of hard coded location
-                    Call<WeatherResponse> call = openWeatherService.getForecast(lat, lon, cnt);
-                    call.enqueue(new Callback<WeatherResponse>() {
-                        @Override
-                        public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
-
-                            WeatherDpHelper.clearWeatherData(mDaoMaster);
-
-                            //convert response body into WeatherResponse POJO
-                            WeatherResponse weatherResponse = response.body();
-                            //insert weather data into db
-                            WeatherDpHelper.weatherBulkInsert(weatherResponse.getWeatherItem(),mDaoMaster);
-                            //update new data into recycler view
-                            updateWeatherList();
-                            onShowingWeatherData();
-                        }
-
-                        @Override
-                        public void onFailure(Call<WeatherResponse> call, Throwable t) {
-                            onShowingWeatherData();
-                            Log.e("Network Error: " , "Failed of fetching forecast data!");
-                            Toast.makeText(getApplication(), "Network Error: Failed of fetching forecast data!",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
+            public void onComplete(@NonNull Task<Location> task) {
+                if(task.isSuccessful() && task.getResult() != null){
+                    Location lastLocation = task.getResult();
+                    loadWeatherData(lastLocation.getLatitude(), lastLocation.getLongitude());
+                }else
+                {
+                    Log.e(TAG, "Cannot get current location");
                 }
             }
         });
@@ -167,7 +120,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        getWeatherData();
+        if(checkPermission()){
+            showForecastList();
+        }else{
+            requestPermission();
+        }
     }
 
     @Override
@@ -196,5 +153,82 @@ public class MainActivity extends AppCompatActivity implements
         Intent detailActivityIntent = new Intent(this,DetailActivity.class);
         detailActivityIntent.putExtra(WeatherDpHelper.FORECAST_ID,id);
         startActivity(detailActivityIntent);
+    }
+
+    private void loadWeatherData(double lat, double lon){
+        //Show progressBar while loading data
+        onLoadingWeatherData();
+
+        //get settings variables for fetching weather data
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        String cnt = sharedPreferences.getString(
+                getString(R.string.pref_cnt_key), getString(R.string.pref_cnt_default_value));
+        OpenWeatherService openWeatherService =
+                NetworkUtils.createService(OpenWeatherService.class);
+        Call<WeatherResponse> call = openWeatherService.getForecast(lat, lon, cnt);
+        call.enqueue(new Callback<WeatherResponse>() {
+            @Override
+            public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
+
+                WeatherDpHelper.clearWeatherData(mDaoMaster);
+
+                //convert response body into WeatherResponse POJO
+                WeatherResponse weatherResponse = response.body();
+                //insert weather data into db
+                WeatherDpHelper.weatherBulkInsert(weatherResponse.getWeatherItem(), mDaoMaster);
+                //update new data into recycler view
+                updateWeatherList();
+                onShowingWeatherData();
+            }
+
+            @Override
+            public void onFailure(Call<WeatherResponse> call, Throwable t) {
+                onShowingWeatherData();
+                Log.e("Network Error: ", "Failed of fetching forecast data!");
+                Toast.makeText(getApplication(), "Network Error: Failed of fetching forecast data!",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     *  Check does activity has permission to access to coarse_location
+     * @return whether permission has been granted or not
+     */
+    private boolean checkPermission(){
+        int permissionStatus = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        return permissionStatus == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * request permission needed
+     */
+    private void requestPermission(){
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                PERMISSION_REQUEST_ID
+        );
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode){
+            case PERMISSION_REQUEST_ID:
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    // permission granted
+                    showForecastList();
+                }else
+                {
+                    Toast.makeText(this, getResources().getString(R.string.reject_permission_warning)
+                            , Toast.LENGTH_LONG).show();
+                    // Permission denied
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                break;
+        }
     }
 }
