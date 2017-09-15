@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,6 +31,7 @@ import com.tri_nguyen.android.doesitrain.data.DaoMaster;
 import com.tri_nguyen.android.doesitrain.data.WeatherDpHelper;
 import com.tri_nguyen.android.doesitrain.data.WeatherInfo;
 import com.tri_nguyen.android.doesitrain.data.weather_pojo.WeatherResponse;
+import com.tri_nguyen.android.doesitrain.utils.LocationUtils;
 import com.tri_nguyen.android.doesitrain.utils.NetworkUtils;
 import com.tri_nguyen.android.doesitrain.utils.OpenWeatherService;
 
@@ -49,18 +51,17 @@ public class MainActivity extends AppCompatActivity implements
     private List<WeatherInfo> mForecastList = new ArrayList<>();
 
     private DaoMaster mDaoMaster;
-    private FusedLocationProviderClient mFusedLocationClient;
 
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int PERMISSION_REQUEST_ID = 17;
-
+    private LocationUtils locationUtils;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationUtils = new LocationUtils(this);
 
         //remove action bar's border
         getSupportActionBar().setElevation(0);
@@ -83,18 +84,10 @@ public class MainActivity extends AppCompatActivity implements
      * fetch weather data from server
      */
     private void showForecastList() {
-        mFusedLocationClient.getLastLocation().addOnCompleteListener(this, new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if(task.isSuccessful() && task.getResult() != null){
-                    Location lastLocation = task.getResult();
-                    loadWeatherData(lastLocation.getLatitude(), lastLocation.getLongitude());
-                }else
-                {
-                    Log.e(TAG, "Cannot get current location");
-                }
-            }
-        });
+        Location location = locationUtils.getLocation();
+        if(location != null){
+            loadWeatherData(location.getLatitude(), location.getLongitude());
+        }
     }
 
 
@@ -125,11 +118,6 @@ public class MainActivity extends AppCompatActivity implements
         }else{
             requestPermission();
         }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     private void onLoadingWeatherData(){
@@ -196,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements
      * @return whether permission has been granted or not
      */
     private boolean checkPermission(){
-        int permissionStatus = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        int permissionStatus = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         return permissionStatus == PackageManager.PERMISSION_GRANTED;
     }
 
@@ -206,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements
     private void requestPermission(){
         ActivityCompat.requestPermissions(
                 this,
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 PERMISSION_REQUEST_ID
         );
     }
