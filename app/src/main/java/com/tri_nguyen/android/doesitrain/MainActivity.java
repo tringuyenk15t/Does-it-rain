@@ -27,13 +27,18 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.tri_nguyen.android.doesitrain.data.CallbackEvent;
 import com.tri_nguyen.android.doesitrain.data.DaoMaster;
 import com.tri_nguyen.android.doesitrain.data.WeatherDpHelper;
 import com.tri_nguyen.android.doesitrain.data.WeatherInfo;
 import com.tri_nguyen.android.doesitrain.data.weather_pojo.WeatherResponse;
+import com.tri_nguyen.android.doesitrain.sync.SynchronizeUtils;
 import com.tri_nguyen.android.doesitrain.utils.LocationUtils;
 import com.tri_nguyen.android.doesitrain.utils.NetworkUtils;
 import com.tri_nguyen.android.doesitrain.utils.OpenWeatherService;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +48,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements
-        ForecastAdapter.ForecastAdapterOnClickHandler {
+        ForecastAdapter.ForecastAdapterOnClickHandler{
     private ProgressBar mProgressBar;
     private RecyclerView rclForecast;
     private RecyclerView.LayoutManager mManager;
@@ -55,10 +60,10 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int PERMISSION_REQUEST_ID = 17;
     private LocationUtils locationUtils;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
         locationUtils = new LocationUtils(this);
@@ -69,8 +74,12 @@ public class MainActivity extends AppCompatActivity implements
         //initialize greenDao
         mDaoMaster = new DaoMaster(new WeatherDpHelper(this).getWritableDatabase());
         initializeViews();
+
     }
 
+    /**
+     * Initialize ui components
+     */
     private void initializeViews() {
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         rclForecast = (RecyclerView) findViewById(R.id.recycler_list_forecast);
@@ -81,15 +90,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * fetch weather data from server
+     *
      */
     private void showForecastList() {
-        Location location = locationUtils.getLocation();
-        if(location != null){
-            loadWeatherData(location.getLatitude(), location.getLongitude());
-        }
+        updateWeatherList();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -110,16 +115,6 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if(checkPermission()){
-            showForecastList();
-        }else{
-            requestPermission();
-        }
-    }
-
     private void onLoadingWeatherData(){
         mProgressBar.setVisibility(View.VISIBLE);
         rclForecast.setVisibility(View.INVISIBLE);
@@ -130,10 +125,15 @@ public class MainActivity extends AppCompatActivity implements
         rclForecast.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * load forecast list from db
+     */
     private void updateWeatherList(){
         List<WeatherInfo> forecastList = WeatherDpHelper.getAllWeatherData(mDaoMaster);
-        mAdapter.setWeatherListItem(forecastList);
-        mAdapter.notifyDataSetChanged();
+        if(forecastList.size() >0 && forecastList != null){
+            mAdapter.setWeatherListItem(forecastList);
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -141,42 +141,6 @@ public class MainActivity extends AppCompatActivity implements
         Intent detailActivityIntent = new Intent(this,DetailActivity.class);
         detailActivityIntent.putExtra(WeatherDpHelper.FORECAST_ID,id);
         startActivity(detailActivityIntent);
-    }
-
-    private void loadWeatherData(double lat, double lon){
-        //Show progressBar while loading data
-        onLoadingWeatherData();
-
-        //get settings variables for fetching weather data
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
-        String cnt = sharedPreferences.getString(
-                getString(R.string.pref_cnt_key), getString(R.string.pref_cnt_default_value));
-        OpenWeatherService openWeatherService =
-                NetworkUtils.createService(OpenWeatherService.class);
-        Call<WeatherResponse> call = openWeatherService.getForecast(lat, lon, cnt);
-        call.enqueue(new Callback<WeatherResponse>() {
-            @Override
-            public void onResponse(Call<WeatherResponse> call, Response<WeatherResponse> response) {
-
-                WeatherDpHelper.clearWeatherData(mDaoMaster);
-
-                //convert response body into WeatherResponse POJO
-                WeatherResponse weatherResponse = response.body();
-                //insert weather data into db
-                WeatherDpHelper.weatherBulkInsert(weatherResponse.getWeatherItem(), mDaoMaster);
-                //update new data into recycler view
-                updateWeatherList();
-                onShowingWeatherData();
-            }
-
-            @Override
-            public void onFailure(Call<WeatherResponse> call, Throwable t) {
-                onShowingWeatherData();
-                Log.e("Network Error: ", "Failed of fetching forecast data!");
-                Toast.makeText(getApplication(), "Network Error: Failed of fetching forecast data!",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     /**
@@ -205,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements
         switch (requestCode){
             case PERMISSION_REQUEST_ID:
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    SynchronizeUtils.initializeWeatherData(this);
                     // permission granted
                     showForecastList();
                 }else
@@ -218,5 +183,28 @@ public class MainActivity extends AppCompatActivity implements
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
                 break;
         }
+    }
+
+    @Subscribe
+    public void onHandleCallbackEvent(CallbackEvent event){
+        updateWeatherList();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(checkPermission()){
+            SynchronizeUtils.initializeWeatherData(this);
+            showForecastList();
+        }else{
+            requestPermission();
+        }
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 }
