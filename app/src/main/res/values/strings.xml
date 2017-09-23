@@ -112,4 +112,10 @@
        - - - - - - - - - - - - - - - - -->
     <string name="reject_permission_warning">You has rejected an importance permission, this app can not work without that permission. Please consider it to use permission!</string>
 
+    <!-- - - - - - - - - - - - - - - - -
+   - Used by NotificationUtils   -
+   - - - - - - - - - - - - - - - - -->
+    <string name="notification_text_format">
+        New weather data has been downloaded \n Time update: %1$s
+    </string>
 </resources>

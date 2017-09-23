@@ -51,5 +51,12 @@ dependencies {
     // add greenDAO library
     compile 'org.greenrobot:greendao:3.2.2'
 
+    //google play job service
     compile 'com.google.android.gms:play-services-location:11.+'
+
+    //firebase job dispatcher
+    compile 'com.firebase:firebase-jobdispatcher:0.8.1'
+
+    //event bus
+    compile 'org.greenrobot:eventbus:3.0.0'
 }

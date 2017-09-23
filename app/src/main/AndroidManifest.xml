@@ -28,11 +28,25 @@
         <activity android:name=".DetailActivity"
             android:parentActivityName=".MainActivity">
         </activity>
+
         <activity android:name=".SettingsActivity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+
+        <service android:name=".sync.SynchronizeIntentService"
+            android:exported="false">
+
+        </service>
+
+        <service
+            android:name=".sync.SynchronizeJobService"
+            android:exported="false">
+                <intent-filter>
+                    <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"></action>
+                </intent-filter>
+        </service>
     </application>
 </manifest>

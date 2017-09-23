@@ -85,4 +85,13 @@ public class DateTimeUtils {
     private static long elapsedDaysSinceEpoch(long utcDate) {
         return TimeUnit.MILLISECONDS.toDays(utcDate);
     }
+
+
+    public static String convertFullDateTimeToString(Context context, long dt){
+
+        SimpleDateFormat format = new SimpleDateFormat("mm:HH MM/dd/yyyy");
+
+        String dateInString = format.format(dt);
+        return dateInString;
+    }
 }

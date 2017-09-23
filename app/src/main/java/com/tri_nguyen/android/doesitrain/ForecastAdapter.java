@@ -1,6 +1,8 @@
 package com.tri_nguyen.android.doesitrain;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,15 +77,26 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
                 .load(imgUrl)
                 .into(holder.imgWeatherIcon);
 
+
         double maxTempInDouble = singleItem.getMaxTemperature();
+        double minTempInDouble = singleItem.getMinTemperature();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        String units = sharedPreferences.getString(
+                mContext.getString(R.string.pref_unit_key),
+                mContext.getString(R.string.pref_units_metric));
+
+        if(units.equals(mContext.getString(R.string.pref_units_imperial))){
+            maxTempInDouble+= 32;
+            minTempInDouble += 32;
+        }
+
         String highString = WeatherUtils.formatTemperature(mContext, maxTempInDouble);
         String highA11y = mContext.getString(R.string.a11y_high_temp, highString);
         holder.tvHigh.setText(highA11y);
 
-        double minTempInDouble = singleItem.getMinTemperature();
         String lowString = WeatherUtils.formatTemperature(mContext, minTempInDouble);
         holder.tvLow.setText(lowString);
-
     }
 
     public class ForecastListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
